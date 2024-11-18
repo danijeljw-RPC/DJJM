@@ -45,7 +45,7 @@ services:
       - POSTGRES_PASSWORD=your_db_password
       - POSTGRES_DB=your_db_name
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - djjm-postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"  # Optional: Expose PostgreSQL port
     networks:
@@ -73,5 +73,10 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data:
-    driver: local
+  djjm-postgres-data:
+    external: true
+
+# old volume detail
+# volumes:
+#   postgres-data:
+#     driver: local
