@@ -4,6 +4,9 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # Set the working directory inside the container
 WORKDIR /app
 
+# Install wasm-tools
+RUN dotnet workload install wasm-tools
+
 # Copy the project file(s) and restore dependencies
 COPY ["DJJM.Finance.csproj", "./"]
 RUN dotnet restore
