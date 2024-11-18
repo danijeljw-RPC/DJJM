@@ -10,7 +10,7 @@ namespace DJJM.API.Models
 
         [Required]
         [MinLength(6, ErrorMessage = "Password should be minimum 6 characters")]
-        public required string Password { get; set; } = null!;
+        public required string Password { get; set; }
 
         [Required]
         [Compare("Password", ErrorMessage = "Confirm Password does not match")]

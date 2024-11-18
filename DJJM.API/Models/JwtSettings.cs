@@ -3,9 +3,9 @@ namespace DJJM.API.Models
 {
     public class JwtSettings
     {
-        public string Secret { get; set; } = null!;
-        public string Issuer { get; set; } = null!;
-        public string Audience { get; set; } = null!;
+        public required string Secret { get; set; }
+        public required string Issuer { get; set; }
+        public required string Audience { get; set; }
         public int ExpirationInMinutes { get; set; }
     }
 }

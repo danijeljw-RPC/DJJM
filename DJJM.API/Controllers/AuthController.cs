@@ -4,6 +4,7 @@ using DJJM.API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NanoidDotNet;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -40,7 +41,8 @@ namespace DJJM.API.Controllers
             {
                 Email = model.Email,
                 UserName = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString()
+                //SecurityStamp = Guid.NewGuid().ToString()
+                SecurityStamp = Nanoid.Generate().ToString(),  //swap GUID to Nanoid
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
