@@ -17,16 +17,27 @@ namespace DJJM.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Bind and configure JwtSettings
+            // 1. Bind and configure JwtSettings
             var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
             builder.Services.Configure<JwtSettings>(jwtSettingsSection);
 
-            // Register the DbContext with PostgreSQL provider
+            var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
+
+            // 2. Validate JwtSettings
+            if (jwtSettings == null ||
+                string.IsNullOrEmpty(jwtSettings.Secret) ||
+                string.IsNullOrEmpty(jwtSettings.Issuer) ||
+                string.IsNullOrEmpty(jwtSettings.Audience))
+            {
+                throw new InvalidOperationException("JWT Settings are not properly configured in appsettings.json.");
+            }
+
+            // 3. Register the DbContext with PostgreSQL provider
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            // Add Identity services
+            // 4. Add Identity services
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
                 // Password settings
@@ -39,35 +50,14 @@ namespace DJJM.API
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // Add Email Sender Service
+            // 5. Add Email Sender Service
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-            // Register and validate JwtSettings
+            // 6. Register and validate JwtSettings
             builder.Services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidation>();
 
-            var app = builder.Build();
-
-            // Validate JwtSettings after building the service provider
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var options = services.GetRequiredService<IOptions<JwtSettings>>().Value;
-
-                if (string.IsNullOrEmpty(options.Secret) ||
-                    string.IsNullOrEmpty(options.Issuer) ||
-                    string.IsNullOrEmpty(options.Audience))
-                {
-                    throw new InvalidOperationException("JWT Settings are not properly configured in appsettings.json.");
-                }
-            }
-
-            // Configure JWT authentication
-            var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-            if (string.IsNullOrEmpty(jwtSettings?.Secret))
-            {
-                throw new InvalidOperationException("JWT Settings are not properly configured in appsettings.json.");
-            }
-            var key = Encoding.UTF8.GetBytes(jwtSettings!.Secret);
+            // 7. Configure JWT authentication
+            var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
 
             builder.Services.AddAuthentication(options =>
             {
@@ -88,60 +78,61 @@ namespace DJJM.API
                 };
             });
 
-            // Add controllers
+            // 8. Add controllers
             builder.Services.AddControllers();
 
-            // Register Swagger services
+            // 9. Register Swagger services
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            var builtApp = builder.Build();
+            // 10. Build the app (only once)
+            var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (builtApp.Environment.IsDevelopment())
+            // 11. Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
             {
-                builtApp.UseSwagger();
-                builtApp.UseSwaggerUI();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
-            builtApp.UseAuthentication(); // Ensure authentication middleware is added before authorization
-            builtApp.UseAuthorization();
+            app.UseAuthentication(); // Ensure authentication middleware is added before authorization
+            app.UseAuthorization();
 
-            builtApp.MapControllers();
+            app.MapControllers();
 
-            builtApp.Run();
+            app.Run();
         }
-    }
-    
-    // Custom validation class
-    public class JwtSettingsValidation : IValidateOptions<JwtSettings>
-    {
-        public ValidateOptionsResult Validate(string? name, JwtSettings options)
+
+        // Custom validation class
+        public class JwtSettingsValidation : IValidateOptions<JwtSettings>
         {
-            // Ensure options is not null (defensive programming)
-            if (options == null)
+            public ValidateOptionsResult Validate(string? name, JwtSettings options)
             {
-                throw new ArgumentNullException(nameof(options), "JWT settings cannot be null.");
-            }
+                // Ensure options is not null (defensive programming)
+                if (options == null)
+                {
+                    throw new ArgumentNullException(nameof(options), "JWT settings cannot be null.");
+                }
 
-            // Validate required fields
-            if (string.IsNullOrEmpty(options.Secret))
-            {
-                return ValidateOptionsResult.Fail("JWT Secret is not configured.");
-            }
+                // Validate required fields
+                if (string.IsNullOrEmpty(options.Secret))
+                {
+                    return ValidateOptionsResult.Fail("JWT Secret is not configured.");
+                }
 
-            if (string.IsNullOrEmpty(options.Issuer))
-            {
-                return ValidateOptionsResult.Fail("JWT Issuer is not configured.");
-            }
+                if (string.IsNullOrEmpty(options.Issuer))
+                {
+                    return ValidateOptionsResult.Fail("JWT Issuer is not configured.");
+                }
 
-            if (string.IsNullOrEmpty(options.Audience))
-            {
-                return ValidateOptionsResult.Fail("JWT Audience is not configured.");
-            }
+                if (string.IsNullOrEmpty(options.Audience))
+                {
+                    return ValidateOptionsResult.Fail("JWT Audience is not configured.");
+                }
 
-            // Return success if all validations pass
-            return ValidateOptionsResult.Success;
+                // Return success if all validations pass
+                return ValidateOptionsResult.Success;
+            }
         }
     }
 }
