@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DJJM.Finance", "DJJM.Finance\DJJM.Finance.csproj", "{EFB85938-1CB0-407E-B908-627ADE9445D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DJJM.API", "DJJM.API\DJJM.API.csproj", "{8BC638E7-5CAD-4360-ABA5-5FEABE7A7B51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{EFB85938-1CB0-407E-B908-627ADE9445D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFB85938-1CB0-407E-B908-627ADE9445D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFB85938-1CB0-407E-B908-627ADE9445D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BC638E7-5CAD-4360-ABA5-5FEABE7A7B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BC638E7-5CAD-4360-ABA5-5FEABE7A7B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BC638E7-5CAD-4360-ABA5-5FEABE7A7B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BC638E7-5CAD-4360-ABA5-5FEABE7A7B51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

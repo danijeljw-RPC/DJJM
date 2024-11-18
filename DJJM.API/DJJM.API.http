@@ -1,0 +1,6 @@
+@DJJM.API_HostAddress = http://localhost:5220
+
+GET {{DJJM.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
