@@ -3,11 +3,21 @@ services:
     build:
       context: ./DJJM.API
       dockerfile: Dockerfile
+    container_name: api
     ports:
       - "5000:5000" # Updated to match the ASPNETCORE_URLS in the Dockerfile
       - "5001:5001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=your_db_user
+      - DATABASE_PASSWORD=your_db_password
+      - DATABASE_NAME=your_db_name
+      # Example connection string (adjust as needed in your application)
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=your_db_name;Username=your_db_user;Password=your_db_password
+    depends_on:
+      - postgres
     networks:
       - djjm-network
 
@@ -15,16 +25,53 @@ services:
     build:
       context: ./DJJM.Finance
       dockerfile: Dockerfile
+    container_name: finance
     ports:
-      - "8080:80" # Exposing the WASM project on port 5000
+      - "8080:80" # Exposing the WASM project on port 8080
     depends_on:
       - api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - API_BASE_URL=http://api:5220 # Updated API service URL to match the API's port
+      - API_BASE_URL=http://api:5000 # Updated API service URL to match the API's port
+    networks:
+      - djjm-network
+
+  postgres:
+    image: postgres:15-alpine  # Use a specific PostgreSQL version
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=your_db_user
+      - POSTGRES_PASSWORD=your_db_password
+      - POSTGRES_DB=your_db_name
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # Optional: Expose PostgreSQL port
+    networks:
+      - djjm-network
+
+  pgadmin4:
+    image: dpage/pgadmin4:8.13.0
+    container_name: pgadmin4
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@domain.Compose
+      - PGADMIN_DEFAULT_PASSWORD=SuperSecret
+      - PGADMIN_CONFIG_LOGIN_BANNER="Authorised users only!"
+      - PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10
+      - PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION=True
+    ports:
+      - "5050:80"
     networks:
       - djjm-network
 
 networks:
   djjm-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
